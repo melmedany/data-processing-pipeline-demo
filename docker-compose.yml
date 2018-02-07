@@ -1,0 +1,35 @@
+version: '3.1'
+services: 
+  redis:
+    container_name: demo-redis
+    image: redis:latest
+    restart: always
+    ports: 
+    - "6379:6379"
+
+  mariadb:
+    container_name: demo-mariadb
+    image: mariadb:latest
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    environment:
+        MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        MYSQL_DATABASE: "demo"
+        MYSQL_ROOT_HOST: "%"
+    ports: 
+        - "3306:3306"
+    restart: always
+
+  app:
+    container_name: demo-app
+    restart: always
+    build: .
+    working_dir: /app    
+    volumes:
+      - .:/app
+      - ~/.m2:/root/.m2
+    expose:
+        - "9000"
+    command: mvn clean spring-boot:run
+    depends_on:
+      - mariadb
+      - redis 
