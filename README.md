@@ -19,6 +19,7 @@ Following the instructions will get you a copy of the project up and running on 
 
 ## Prerequisites
 - [Docker CE](https://docs.docker.com/install)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
 
 ## Used Technologies
