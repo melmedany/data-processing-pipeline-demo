@@ -55,6 +55,7 @@ public class MessageService {
 	public boolean post(String jsonString) {
 		boolean valid = false;
 		try {
+			// double check JSON validity
 			valid = isJSON(jsonString);
 			redis.convertAndSend("rest-payload", jsonString);
 		} catch (IOException e) {

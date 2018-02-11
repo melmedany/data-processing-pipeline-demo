@@ -44,10 +44,14 @@ public class RedisListener implements MessageListener {
 		Message content = new Message(message.toString());
 		content.setDate(new Date());
 		logger.info("---------- Persisting to Database ----------");
-		content = repo.save(content);
-		logger.info("---------- ID:" + content.getId() + "----------");
-
-		logger.info("---------- Notify listeners ----------");
-		socket.convertAndSend("/topic/messages", content);
+		try {
+			content = repo.save(content);
+			logger.info("---------- ID:" + content.getId() + "----------");
+			logger.info("---------- Notify listeners ----------");
+			socket.convertAndSend("/topic/messages", new Object[] { content });
+		} catch (Exception e) {
+			socket.convertAndSend("/topic/messages", new Object[] { "Error Persisting Message" });
+			logger.info("---------- Error Persisting Message ----------", e);
+		}
 	}
 }
