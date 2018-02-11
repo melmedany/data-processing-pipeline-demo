@@ -28,7 +28,7 @@ public class Message {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@Column(name = "content")
+	@Column(name = "content", columnDefinition = "LONGTEXT")
 	private String content;
 
 	@Temporal(TemporalType.TIMESTAMP)
