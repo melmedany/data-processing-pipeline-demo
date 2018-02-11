@@ -8,18 +8,31 @@
     $scope.errorAlert = document.getElementsByClassName("alert-danger")[0];
     $scope.successAlert = document.getElementsByClassName("alert-success")[0];
     
-    $scope.send = function(){
-    	
-    	$scope.sendBTN.disabled = true;
-		$scope.loading.className = '';
+    $scope.initErrors = function(){
 		$scope.loading.className = 'fa fa-spinner fa-spin';
     	$scope.successAlert.className = $scope.successAlert.className.replace('show', 'hidden');
     	$scope.errorAlert.className = $scope.errorAlert.className.replace('show', 'hidden');
+		$scope.errorAlert.innerHTML = '<strong>Error</strong> JSON unparseable';
+    }
+    
+    $scope.beforeSend = function(){
+    	$scope.sendBTN.disabled = true;
+		$scope.loading.className = '';
+		$scope.initErrors();
+    }
+    
+    $scope.afterSend = function(){
+		$scope.loading.className = '';
+		$scope.loading.className = 'fa fa-send';
+    	$scope.sendBTN.disabled = false;
+    }
+    
+    $scope.send = function(){
+    	$scope.beforeSend();
     	try {
             JSON.parse($scope.message);
         	$scope.parsed = true;
 	    	DemoService.send($scope.message).then(function(messages) {
-	        	$scope.successAlert.className = $scope.successAlert.className.replace('hidden', 'show');
 	            $scope.message = "";
 	        }, function(success) {
 	        	console.log(success);
@@ -31,9 +44,7 @@
         	$scope.errorAlert.className = $scope.errorAlert.className.replace('hidden', 'show');
         	$scope.parsed = false;
         }
-		$scope.loading.className = '';
-		$scope.loading.className = 'fa fa-send';
-    	$scope.sendBTN.disabled = false;
+        $scope.afterSend();
     }
     
     DemoService.getAll().then(function(messages) {
@@ -43,7 +54,14 @@
 	});
     
     DemoService.receive().then(null, null, function(message) {
-        $scope.messages.unshift(JSON.parse(message));
+    	data = JSON.parse(message);
+    	if(data[0].toString().toLowerCase().includes('error')) {
+    		$scope.errorAlert.innerHTML = '<strong>Error</strong> ' + data[0];
+        	$scope.errorAlert.className = $scope.errorAlert.className.replace('hidden', 'show');
+    	} else {
+    		$scope.messages.unshift(data[0]);
+        	$scope.successAlert.className = $scope.successAlert.className.replace('hidden', 'show');
+    	}
     }, function(err) {
 		console.error('Error receiving messages');
 	});
