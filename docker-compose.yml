@@ -4,6 +4,7 @@ services:
     container_name: demo-redis
     image: redis:latest
     restart: always
+    network_mode: "host"
     ports: 
     - "6379:6379"
 
@@ -15,13 +16,15 @@ services:
         MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
         MYSQL_DATABASE: "demo"
         MYSQL_ROOT_HOST: "%"
+    restart: always
+    network_mode: "host"
     ports: 
         - "3306:3306"
-    restart: always
 
   app:
     container_name: demo-app
     restart: always
+    network_mode: "host"
     build: .
     working_dir: /app    
     volumes:
