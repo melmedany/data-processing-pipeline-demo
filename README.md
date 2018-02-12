@@ -28,7 +28,7 @@ Following the instructions will get you a copy of the project up and running on 
 - [Redis](https://redis.io/documentation) - Message Broker
 - [MariaDB](https://mariadb.org/) - Database
 - [Maven](http://maven.apache.org/guides/) - Build & Dependency Management
-- [Docker](https://docs.docker.com/) - Virtualization
+- [Docker](https://docs.docker.com/) - Containerization
 
 
 ## How to Test?
