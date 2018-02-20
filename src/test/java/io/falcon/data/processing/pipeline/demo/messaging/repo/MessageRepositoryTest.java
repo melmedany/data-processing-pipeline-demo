@@ -1,8 +1,7 @@
-package io.falcon.data.processing.pipeline.demo.message.repo;
+package io.falcon.data.processing.pipeline.demo.messaging.repo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +18,20 @@ import io.falcon.data.processing.pipeline.demo.messaging.repository.MessageRepos
 @SpringBootTest
 public class MessageRepositoryTest {
 
+	private static Message actual = new Message(MessageRepositoryTest.class.getSimpleName());
+	private static Message expected;
+
 	@Autowired
 	private MessageRepository repo;
 
-	@Before
-	public void setUp() throws Exception {
-		repo.deleteAll();
-	}
-
 	@Test
 	public void messageCreateRertieveTest() throws Exception {
-		Message actual = new Message("sample message");
 		actual = repo.save(actual);
-		Message expected = repo.findOne(actual.getId());
+		expected = repo.findOne(actual.getId());
+
+		assertThat(expected).isNotEqualTo(null);
 		assertThat(actual.toString()).isEqualTo(expected.toString());
+
+		repo.delete(actual.getId());
 	}
 }

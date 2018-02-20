@@ -19,4 +19,10 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 	 *         an empty list.
 	 */
 	public List<Message> findAllByOrderByDateDesc();
+
+	/**
+	 * 
+	 * @return All persisted messages with specified content
+	 */
+	public List<Message> findByContent(String content);
 }

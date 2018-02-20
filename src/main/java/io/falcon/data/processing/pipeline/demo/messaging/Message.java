@@ -76,7 +76,7 @@ public class Message {
 	public String toString() {
 		String msg = "{\"id\":\"" + id + "\",\"content\":\"" + content + "\"";
 		if (date != null)
-			msg = msg.concat(",\"date\":\"\"" + date.getTime() + "\"");
+			msg = msg.concat(",\"date\":\"" + date.getTime() + "\"");
 		msg = msg.concat("}");
 		return msg;
 	}

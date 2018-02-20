@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +26,13 @@ import io.falcon.data.processing.pipeline.demo.messaging.repository.MessageRepos
 @AutoConfigureMockMvc
 public class EndpointTest {
 
+	private static final Message actual = new Message(EndpointTest.class.getSimpleName());
+
 	@Autowired
 	private MessageRepository repo;
 
 	@Autowired
 	private MockMvc endpoint;
-
-	@Before
-	public void setUp() throws Exception {
-		repo.deleteAll();
-	}
 
 	@Test
 	public void getMessageTest() throws Exception {
@@ -48,17 +44,17 @@ public class EndpointTest {
 
 	@Test
 	public void postMessageTest() throws Exception {
-		Message actual = new Message("sample message");
-
 		endpoint.perform(post("/endpoint").contentType(MediaType.APPLICATION_JSON).content(actual.toString()))
-				.andExpect(status().isCreated());
+				.andExpect(status().isAccepted());
+
+		Thread.sleep(2000); // allow time to persist message
+
+		repo.delete(repo.findByContent(actual.toString()));
 	}
 
 	@Test
 	public void postWrongJSONMessageTest() throws Exception {
-		Message actual = new Message("sample message");
-
-		endpoint.perform(post("/endpoint").contentType(MediaType.APPLICATION_JSON).content(actual.getContent()))
-				.andExpect(status().isConflict());
+		endpoint.perform(post("/endpoint").contentType(MediaType.APPLICATION_JSON)
+				.content("\"" + EndpointTest.class.getSimpleName() + "\"")).andExpect(status().isUnprocessableEntity());
 	}
 }
