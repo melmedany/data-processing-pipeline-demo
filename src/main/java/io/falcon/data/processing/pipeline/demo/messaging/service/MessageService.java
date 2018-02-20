@@ -6,14 +6,13 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.falcon.data.processing.pipeline.demo.messaging.Message;
+import io.falcon.data.processing.pipeline.demo.messaging.RedisProducer;
 import io.falcon.data.processing.pipeline.demo.messaging.repository.MessageRepository;
 
 /**
@@ -23,6 +22,7 @@ import io.falcon.data.processing.pipeline.demo.messaging.repository.MessageRepos
 public class MessageService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
 	 * Messaging repository instance
@@ -31,10 +31,10 @@ public class MessageService {
 	private MessageRepository repo;
 
 	/**
-	 * Redis template
+	 * Redis Service
 	 */
 	@Autowired
-	private RedisTemplate<String, Object> redis;
+	private RedisProducer redis;
 
 	/**
 	 * Find all database persisted Message objects
@@ -53,30 +53,36 @@ public class MessageService {
 	 *            JSON String to put on Redis
 	 */
 	public boolean post(String jsonString) {
-		boolean valid = false;
 		try {
-			// double check JSON validity
-			valid = isJSON(jsonString);
-			redis.convertAndSend("rest-payload", jsonString);
+			JsonNode root = parseJSON(jsonString);
+			if (root != null) {
+				redis.produce(root.toString());
+				return true;
+			}
 		} catch (IOException e) {
 			logger.error("---------- Error reading message JSON ----------", e);
 		}
-		return valid;
+		return false;
 	}
 
 	/**
-	 * Use Jackson to validate a JSON String
+	 * Use jackson to validate a JSON String is only Key/Value pair objects
 	 * 
 	 * @param jsonString
 	 *            input JSON String
 	 * @return true if valid JSON, false if not
-	 * @throws JsonParseException
 	 * @throws IOException
 	 */
-	private boolean isJSON(String jsonString) throws JsonParseException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode actualObj = mapper.readTree(jsonString);
-		return actualObj != null;
-	}
+	private JsonNode parseJSON(String jsonString) throws IOException {
+		JsonNode root = mapper.readTree(jsonString);
+		if (root != null) {
+			if (root.isArray()) // if array of key value pairs
+				if (root.get(0) != null && root.get(0).fields().hasNext())
+					return root;
+			if (root.fields().hasNext()) // if key value pairs
+				return root;
+		}
 
+		return null;
+	}
 }

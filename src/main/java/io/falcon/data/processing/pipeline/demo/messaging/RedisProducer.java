@@ -32,7 +32,6 @@ public class RedisProducer implements MessageProducer {
 	 */
 	@Override
 	public void produce(String content) {
-
 		logger.info("---------- Producing new message ----------");
 		redis.convertAndSend(topic.getTopic(), content);
 	}

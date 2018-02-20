@@ -32,14 +32,13 @@ public class RedisListener implements MessageListener {
 	private MessageRepository repo;
 
 	/**
-	 * Persists it in the database, then push it through WebSocket for listening
-	 * browsers
+	 * Persists received message in the database, then push it through WebSocket for
+	 * listening browsers
 	 * 
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void onMessage(final org.springframework.data.redis.connection.Message message, final byte[] pattern) {
-
 		logger.info("---------- Received new Message ----------");
 		Message content = new Message(message.toString());
 		content.setDate(new Date());
