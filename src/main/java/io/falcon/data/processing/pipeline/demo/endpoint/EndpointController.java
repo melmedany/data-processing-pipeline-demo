@@ -50,16 +50,17 @@ public class EndpointController {
 	/**
 	 * Handler method to POST Message object
 	 * 
-	 * @param json
-	 *            String JSON formated to
-	 * @return CREATED if created, CONFLICT otherwise
+	 * @param message
+	 *            String message formated in JSON Key/Value pair
+	 * @return CREATED if ACCEPTED, UNPROCESSABLE_ENTITY otherwise. BAD_REQUEST is
+	 *         returned if no body present
 	 */
 	@RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<Void> post(@RequestBody String json) {
+	public ResponseEntity<Void> post(@RequestBody String message) {
 		logger.info("---------- Start creating new message ----------");
-		if (service.post(json.toString()))
-			return new ResponseEntity<Void>(HttpStatus.CREATED);
+		if (service.post(message))
+			return new ResponseEntity<Void>(HttpStatus.ACCEPTED);
 		else
-			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+			return new ResponseEntity<Void>(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 }
