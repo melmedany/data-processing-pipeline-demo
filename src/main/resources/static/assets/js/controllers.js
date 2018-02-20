@@ -12,7 +12,7 @@
 		$scope.loading.className = 'fa fa-spinner fa-spin';
     	$scope.successAlert.className = $scope.successAlert.className.replace('show', 'hidden');
     	$scope.errorAlert.className = $scope.errorAlert.className.replace('show', 'hidden');
-		$scope.errorAlert.innerHTML = '<strong>Error</strong> JSON unparseable';
+		$scope.errorAlert.innerHTML = '<strong>Error</strong> invalid Message';
     }
     
     $scope.beforeSend = function(){
@@ -30,21 +30,30 @@
     $scope.send = function(){
     	$scope.beforeSend();
     	try {
-            JSON.parse($scope.message);
-        	$scope.parsed = true;
-	    	DemoService.send($scope.message).then(function(messages) {
-	            $scope.message = "";
-	        }, function(success) {
-	        	console.log(success);
-	    	}, function(err) {
-	        	$scope.errorAlert.className = $scope.errorAlert.className.replace('hidden', 'show');
-	    		console.error('Error posting message');
-	    	});
+    		if(typeof JSON.parse($scope.message) === 'object') {
+    			$scope.parsed = true;
+    	    	DemoService.send($scope.message).then(function(messages) { 
+    	            $scope.afterSend();
+    	            $scope.message = "";
+    	        }, function(success) {
+    	            $scope.afterSend();
+    	        	if(success.status == '422') {
+    		        	$scope.errorAlert.className = $scope.errorAlert.className.replace('hidden', 'show');
+    	        	}
+    	    	}, function(err) {
+    	            $scope.afterSend();
+    	        	$scope.errorAlert.className = $scope.errorAlert.className.replace('hidden', 'show');
+    	    	});
+    		} else {
+                $scope.afterSend();
+            	$scope.errorAlert.className = $scope.errorAlert.className.replace('hidden', 'show');
+            	$scope.parsed = false;
+    		}
         } catch(e) {
+            $scope.afterSend();
         	$scope.errorAlert.className = $scope.errorAlert.className.replace('hidden', 'show');
         	$scope.parsed = false;
         }
-        $scope.afterSend();
     }
     
     DemoService.getAll().then(function(messages) {
